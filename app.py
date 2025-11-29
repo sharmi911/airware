@@ -1,7 +1,10 @@
 from flask import Flask, jsonify, request
 import requests
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 
 # YOUR TOKEN HERE
 WAQI_TOKEN = "073c3095deb057487b16bb27f52e8f17643cd6f5"
@@ -118,3 +121,4 @@ def home():
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
+
