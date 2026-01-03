@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AirAware – Login & Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --accent:#00eaff;
+    --text:#bfefff;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    height:100vh;
+    background:radial-gradient(circle at top, #05133d, #000814);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+/* BRANDING */
+#brandTitle{
+    position:absolute;
+    top:25px;
+    width:100%;
+    text-align:center;
+    font-size:42px;
+    font-family:'Pacifico',cursive;
+    color:var(--accent);
+    text-shadow:0 0 16px rgba(0,234,255,0.55);
+    z-index:20;
+}
+
+#brandSub{
+    position:absolute;
+    top:80px;
+    width:100%;
+    text-align:center;
+    font-size:15px;
+    color:var(--text);
+    z-index:20;
+}
+
+/* BOX */
+.auth-box{
+    width:360px;
+    padding:30px;
+    border-radius:20px;
+    margin-top:130px;
+    background:rgba(4,10,30,0.68);
+    box-shadow:0 20px 55px rgba(0,0,0,0.75);
+    border:1px solid rgba(255,255,255,0.1);
+    position:relative;
+    z-index:10;
+    transition:0.35s;
+}
+
+.auth-box h2{
+    text-align:center;
+    font-size:24px;
+    margin-bottom:18px;
+    color:var(--accent);
+    letter-spacing:1px;
+}
+
+label{
+    color:var(--text);
+    font-size:14px;
+}
+
+.input-box{
+    width:100%;
+    margin-top:8px;
+    padding:11px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.25);
+    background:#02071a;
+    color:var(--text);
+    font-size:14px;
+}
+
+.auth-btn{
+    width:100%;
+    margin-top:25px;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:var(--accent);
+    color:#000;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.bottom-text{
+    text-align:center;
+    margin-top:16px;
+    color:var(--text);
+}
+.bottom-text a{
+    color:var(--accent);
+    cursor:pointer;
+}
+
+/* HIDE SIGNUP INITIALLY */
+#signupForm{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- BRAND -->
+<div id="brandTitle">AirAware</div>
+<div id="brandSub">Precision in Every Prediction</div>
+
+<!-- BOX -->
+<div class="auth-box">
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+        <h2>Login</h2>
+
+        <label>Email</label>
+        <input type="email" id="loginEmail" class="input-box" placeholder="Enter your email">
+
+        <label style="margin-top:15px;">Password</label>
+        <input type="password" id="loginPassword" class="input-box" placeholder="Enter password">
+
+        <button class="auth-btn" onclick="doLogin()">Login</button>
+
+        <div class="bottom-text">
+            Don’t have an account? <a onclick="toggleToSignup()">Sign up</a>
+        </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm">
+        <h2>Create Account</h2>
+
+        <label>Username</label>
+        <input id="username" class="input-box" placeholder="Username">
+
+        <label style="margin-top:15px;">Email</label>
+        <input id="email" class="input-box" placeholder="Email">
+
+        <label style="margin-top:15px;">Password</label>
+        <input id="password" type="password" class="input-box" placeholder="Password">
+
+        <label style="margin-top:15px;">Confirm Password</label>
+        <input id="cpassword" type="password" class="input-box" placeholder="Confirm Password">
+
+        <button class="auth-btn" onclick="doSignup()">Sign Up</button>
+
+        <div class="bottom-text">
+            Already have an account? <a onclick="toggleToLogin()">Login</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ------------------- TOGGLE FUNCTIONS -------------------
+function toggleToSignup(){
+    document.getElementById("loginForm").style.display="none";
+    document.getElementById("signupForm").style.display="block";
+}
+
+function toggleToLogin(){
+    document.getElementById("signupForm").style.display="none";
+    document.getElementById("loginForm").style.display="block";
+}
+
+// ------------------- LOGIN -------------------
+function doLogin(){
+    let email=document.getElementById("loginEmail").value;
+    let pass=document.getElementById("loginPassword").value;
+
+    if(email==="" || pass===""){
+        alert("Please fill all fields");
+        return;
+    }
+    if(!email.includes("@")){
+        alert("Enter a valid email");
+        return;
+    }
+
+    window.location.href="dash.html"; 
+}
+
+// ------------------- SIGNUP VALIDATION -------------------
+function validatePassword(pass){
+    const cap=/[A-Z]/;
+    const num=/[0-9]/;
+    const sp=/[\W_]/;
+
+    return cap.test(pass) && num.test(pass) && sp.test(pass) && pass.length>=6;
+}
+
+function doSignup(){
+    let u=document.getElementById("username").value.trim();
+    let e=document.getElementById("email").value.trim();
+    let p=document.getElementById("password").value.trim();
+    let cp=document.getElementById("cpassword").value.trim();
+
+    if(!u || !e || !p || !cp){
+        alert("Fill all fields");
+        return;
+    }
+    if(!e.includes("@")){
+        alert("Invalid email format");
+        return;
+    }
+    if(p!==cp){
+        alert("Passwords do not match");
+        return;
+    }
+    if(!validatePassword(p)){
+        alert("Password must include:\n• Capital letter\n• Number\n• Special character\n• 6+ characters");
+        return;
+    }
+
+    alert("Account Created Successfully!");
+    window.location.href="dash.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AirAware — Smart AQI Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg1:#030730;
+    --bg2:#001a3c;
+    --card:#050b24;
+    --text:#bfefff;
+    --glow:#00eaff;
+    --accent:#00eaff;
+}
+
+/* global */
+*{
+    box-sizing:border-box;
+    transition:background .25s,color .25s,border-color .25s,box-shadow .25s;
+}
+html,body{
+    height:100%;margin:0;
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--text);
+}
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR -------------------------------------------------- */
+.sidebar{
+    width:280px;
+    padding:18px 16px;
+    background:linear-gradient(180deg,rgba(0,0,0,0.75),rgba(0,0,30,0.95));
+    border-right:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+.sidebar-title{
+    font-size:24px;
+    font-weight:700;
+    color:var(--glow);
+}
+.sidebar-sub{
+    font-size:12px;
+    color:rgba(200,240,255,0.8);
+}
+#stateSelect{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.18);
+    background:#02071a;
+    color:var(--text);
+    font-size:13px;
+}
+.sidebar-section-label{
+    margin-top:14px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    opacity:.7;
+}
+.sb-btn{
+    width:100%;
+    margin-top:6px;
+    padding:10px 12px;
+    border-radius:9px;
+    border:1px solid transparent;
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    font-size:13px;
+    text-align:left;
+    cursor:pointer;
+}
+.sb-btn:hover{
+    border-color:rgba(255,255,255,0.35);
+}
+.sb-btn.active{
+    border-color:var(--accent);
+    box-shadow:0 0 12px rgba(0,0,0,0.8);
+}
+.sidebar-footer{
+    margin-top:auto;
+    font-size:11px;
+    opacity:.6;
+}
+/* Profile button container */
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+/* Hover effect */
+.profile-btn:hover {
+    background: rgba(0,234,255,0.12);
+    border-color: rgba(0,234,255,0.6);
+    box-shadow: 0 0 14px rgba(0,234,255,0.35);
+}
+
+/* Avatar circle */
+.profile-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #00eaff;
+    color: #000;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 12px rgba(0,234,255,0.8);
+}
+
+/* Username + subtext */
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.profile-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #bfefff;
+}
+
+.profile-sub {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+
+/* MAIN -------------------------------------------------- */
+.main{
+    flex:1;
+    padding:16px 18px 24px 18px;
+}
+.main-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+.header-title{
+    font-size:26px;
+    font-weight:700;
+    color:var(--glow);
+}
+.header-sub{
+    font-size:11px;
+    opacity:.75;
+}
+.conf-pill{
+    padding:4px 9px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(0,0,0,0.3);
+}
+.page{
+    display:none;
+    margin-top:14px;
+}
+.page.active{display:block;}
+
+/* Cards */
+.cards-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+}
+.card{
+    background:var(--card);
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.07);
+    padding:14px 16px;
+    box-shadow:0 14px 32px rgba(0,0,0,0.6);
+}
+.card-half{flex:1;min-width:260px;}
+.card-wide{width:100%;}
+.card h3{margin:0;font-size:15px;color:var(--glow);}
+.card small{opacity:.75;font-size:11px;}
+
+.stat-line{font-size:12px;margin-top:3px;}
+.stat-line strong{display:inline-block;width:130px;}
+
+#healthBanner{
+    margin-top:8px;
+    padding:7px 9px;
+    border-radius:8px;
+    background:rgba(255,82,82,0.12);
+    border:1px solid rgba(255,120,120,0.6);
+    font-size:11px;
+    display:none;
+}
+
+canvas{max-width:100%;}
+
+/* HEATMAP -------------------------------------------------- */
+.timeline-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(6, 1fr); /* Day + 6 hours */
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.timeline-grid > div {
+    font-size: 11px;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-cell {
+    color: #fff;
+    font-weight: 600;
+}
+#heatLegend{
+    margin-top:10px;font-size:11px;
+    display:flex;flex-wrap:wrap;gap:10px;
+}
+.leg-box{
+    width:14px;height:14px;border-radius:4px;
+    display:inline-block;margin-right:4px;
+}
+
+/* POPUP MODALS ------------------------------------------- */
+#popupOverlay{
+    position:fixed;top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.65);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+    backdrop-filter:blur(4px);
+    padding:20px;
+}
+#popupBox{
+    width:350px;max-width:90%;
+    background:rgba(8,12,32,0.92);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    padding:20px;
+    box-shadow:0 25px 45px rgba(0,0,0,0.8);
+}
+#popupBox h3{margin:0;font-size:18px;color:var(--glow);}
+#popupBox small{opacity:.8;font-size:12px;}
+
+.popup-actions{
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.popup-input,.popup-text{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    background:#02071a;
+    border:1px solid rgba(255,255,255,0.25);
+    color:var(--text);
+    font-size:12px;
+}
+.popup-text{min-height:110px;}
+
+.popup-btn{
+    padding:10px;border:none;border-radius:10px;
+    background:var(--accent);color:#000;
+    font-size:13px;cursor:pointer;
+}
+.popup-close{
+    padding:8px;background:rgba(255,255,255,0.07);
+    border-radius:10px;text-align:center;
+    font-size:12px;cursor:pointer;
+}
+
+/* share grid */
+.popup-share-grid{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:10px;
+}
+.popup-share-btn{
+    padding:8px;border-radius:10px;
+    background:rgba(255,255,255,0.07);
+    border:none;color:var(--text);
+    cursor:pointer;font-size:12px;
+}
+
+/* CHATBOT -------------------------------------------------- */
+#chatFab{
+    position:fixed;right:18px;bottom:18px;
+    width:52px;height:52px;border-radius:50%;
+    background:#25d366;color:#fff;font-size:24px;
+    display:flex;justify-content:center;align-items:center;
+    box-shadow:0 10px 26px rgba(0,0,0,0.8);
+    cursor:pointer;z-index:9999;
+}
+
+#chatWindow{
+    position:fixed;right:18px;bottom:82px;
+    width:260px;height:260px;border-radius:18px;
+    background:rgba(7,10,30,0.96);
+    border:1px solid rgba(255,255,255,0.2);
+    box-shadow:0 18px 40px rgba(0,0,0,0.9);
+    display:none;flex-direction:column;z-index:9998;
+}
+#chatHeader{
+    padding:8px 10px;
+    display:flex;justify-content:space-between;
+    font-size:12px;font-weight:600;color:var(--glow);
+    border-bottom:1px solid rgba(255,255,255,0.15);
+}
+#chatMessages{
+    flex:1;padding:6px 8px;overflow-y:auto;font-size:11px;
+}
+.chat-bot{
+    background:#111827;color:#d2e6ff;
+    padding:4px 6px;border-radius:8px;margin:3px 0;
+}
+.chat-user{
+    background:#0051b3;color:#fff;
+    padding:4px 6px;border-radius:8px;
+    margin:3px 0;margin-left:auto;
+}
+#chatInputRow{
+    padding:6px 8px;display:flex;gap:4px;
+    border-top:1px solid rgba(255,255,255,0.15);
+}
+#chatInput{
+    flex:1;padding:5px 6px;border-radius:999px;
+    border:1px solid rgba(255,255,255,0.3);
+    background:#020617;color:var(--text);
+    font-size:11px;
+}
+#chatSend,#chatMic{
+    width:32px;height:32px;border-radius:50%;
+    border:none;cursor:pointer;
+}
+#chatSend{background:var(--accent);color:#000;}
+#chatMic{background:#8b5cf6;color:#fff;}
+
+.footer{
+    margin-top:14px;font-size:11px;opacity:.7;text-align:center;
+}
+
+/* ---------------- HEALTH ADVISORY ANIMATION ---------------- */
+.health-advisory {
+    animation: slideFade 0.6s ease-in-out;
+}
+
+@keyframes slideFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse {
+    animation: pulseGlow 1.2s ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+#healthEmoji{
+    font-size: 30px;
+    margin-right: 8px;
+    vertical-align: middle;
+    animation: pulseEmoji 1.0s infinite;
+}
+
+@keyframes pulseEmoji{
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+#languageSelect{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.18);
+    background:#02071a;
+    color:var(--text);
+    font-size:13px;
+}
+
+
+
+
+</style>
+</head>
+
+<body>
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-title">AirAware</div>
+            <div class="sidebar-sub">Precision in Every Prediction</div>
+            <!-- ADD BELOW AirAware title -->
+            <select id="languageSelect"
+                    style="margin-top:8px"
+                    onchange="applyLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="ta">Tamil</option>
+                    <option value="kn">Kannada</option>
+                    <option value="ml">Malayalam</option>
+            </select>
+
+            
+
+            <select id="stateSelect" onchange="onStateChange()">
+                <option value="" selected disabled>Choose State (India)</option>
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option>
+                <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option>
+                <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option>
+                <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option>
+                <option>Odisha</option><option>Punjab</option><option>Rajasthan</option>
+                <option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option>
+                <option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option>
+                <option>West Bengal</option><option>Delhi</option><option>Puducherry</option>
+                <option>Chandigarh</option><option>Andaman and Nicobar Islands</option><option>Ladakh</option>
+                <option>Jammu and Kashmir</option>
+            </select>
+            <button id="favBtn"
+                class="sb-btn"
+                onclick="setFavoriteState()">
+                ⭐ Set as Favorite
+            </button>
+
+            <div class="sidebar-section-label" data-i18n="views">Views</div>
+            <button class="sb-btn active" onclick="showPage('home',this)" data-i18n="home">Home</button>
+            <button class="sb-btn" onclick="showPage('hourly',this)" data-i18n="hourly">Hourly AQI</button>
+            <button class="sb-btn" onclick="showPage('daily',this)" data-i18n="daily">Daily AQI</button>
+            <button class="sb-btn" onclick="showPage('monthly',this)" data-i18n="monthly">Monthly AQI</button>
+            <button class="sb-btn" onclick="showPage('prediction',this)" data-i18n="prediction">Prediction</button>
+
+            <div class="sidebar-section-label" data-i18n="advanced">Advanced</div>
+
+            <button class="sb-btn" onclick="showPage('advanced',this)" data-i18n="advancedHub">Advanced Hub</button>
+            <button class="sb-btn" onclick="showPage('heatmap',this)" data-i18n="heatmap">Heatmap</button>
+            <button class="sb-btn" onclick="showPage('compare',this)" data-i18n="compareStates">Compare States</button>
+            <button class="sb-btn" onclick="showPage('analytics',this)" data-i18n="analytics">Analytics</button>
+            <button class="sb-btn" onclick="showPage('ai',this)" data-i18n="aiInsights">AI Insights</button>
+            <button class="sb-btn" onclick="showPage('tools',this)" data-i18n="toolsThemes">Tools & Themes</button>
+
+            <div class="sidebar-section-label" data-i18n="extras">Extras</div>
+
+            <!-- extras open popup instead of new pages -->
+            <button class="sb-btn" onclick="openPopup('about')" data-i18n="aboutUs">About Us</button>
+            <button class="sb-btn" onclick="openPopup('query')" data-i18n="query">Query</button>
+            <button class="sb-btn" onclick="openPopup('share')" data-i18n="share">Share</button>
+            <button class="sb-btn" onclick="openPopup('feedback')"  data-i18n="feedback">Feedback</button>
+        </div>
+
+        <div class="sidebar-footer">@2025 AirAware.</div>
+        <button class="sb-btn" onclick="window.location.href='/logout'">Logout</button>
+    </aside>
+
+    <!-- MAIN ---------------------------------------------------->
+    <main class="main">
+        <div style="font-size:14px;opacity:0.8;margin-bottom:8px;">
+            Welcome, {{ username }} 👋
+        </div>
+        <div class="main-header">
+            <div>
+                <div class="header-title">AirAware – Smart AQI Dashboard</div>
+                <div class="header-sub">Live air quality, explanations and safety guidance</div>
+            </div>
+            <div class="header-right">
+                <div class="profile-btn" onclick="window.location.href='/profile'">
+                    <div class="profile-avatar">
+                        {{ username[0]|upper }}
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">{{ username }}</div>
+                        <div class="profile-sub">View profile</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME PAGE -->
+        <section id="page-home" class="page active">
+            <div class="cards-row">
+                <div class="card card-half health-advisory">
+
+                    <!-- <h3>🫁 AQI Summary </h3> -->
+                    <h3>🫁 <span data-i18n="aqiSummary">AQI Summary</span>🌤️</h3>
+
+                    <small>Overview for selected state</small>
+                    <div class="stat-line"><strong>Temperature:</strong> <span id="tempValue">-- °C</span></div>
+                    <div class="stat-line"><strong>Min AQI:</strong> <span id="minAQI">--</span></div>
+                    <div class="stat-line">
+                        <strong>Current AQI:</strong> <span id="currAQI">--</span>
+                        <span id="aqiCategory" class="badge-inline">--</span>
+                    </div>
+                    <div class="stat-line"><strong>Max AQI:</strong> <span id="maxAQI">--</span></div>
+                    <div class="stat-line"><strong>Last updated:</strong> <span id="lastUpdated">--</span></div>
+                    <div id="healthBanner"></div>
+                </div>
+
+                <div class="card card-half health-advisory">
+                    <!-- <h3>🤖 AI Recommendation</h3> -->
+                    <h3>🤖 <span data-i18n="aiRecommendation">AI Recommendation</span></h3>
+
+                    <small>Personal safety suggestion</small>
+                    <div id="aiRecoText" style="margin-top:8px;font-size:12px;">
+                        Select a state to get smart recommendations.
+                    </div>
+                </div>
+
+                <div class="card card-half health-advisory">
+
+                    <!-- <h3>🩺 Health Advisory ❤️‍🩹</h3> -->
+                    <h3>❤️ <span data-i18n="healthAdvisory">Health Advisory</span></h3>
+
+                    <small>Personalized AQI guidance</small>
+                    <div id="healthAdviceText" style="margin-top:8px;font-size:12px;">
+                        <span id="healthEmoji">🙂</span>
+                        <span id="healthAdviceMessage">Select a state to get advisory.</span>
+                    </div>
+                </div>
+                <div class="card card-half health-advisory">
+
+                    <!-- <h3>🕘 Your AQI History</h3> -->
+                    <h3>🕘 <span data-i18n="aqiHistory">Your AQI History</span></h3>
+
+                    <small>Recently viewed states</small>
+                    <div id="aqiHistory" style="margin-top:8px;font-size:12px;">
+                        No history yet.
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="cards-row" style="margin-top:18px;">
+                <div class="card card-half">
+                    <h3>Pollutant Mix – Pie Chart</h3>
+                    <small>PM2.5 / PM10 / NO₂ / SO₂</small>
+                    <canvas id="pieCanvas"></canvas>
+                </div>
+            <div class="card card-half">
+                <h3>📊 Yearly Average AQI</h3>
+                <small>State-wise historical average (CPCB)</small>
+                <canvas id="yearlyAqiCanvas"></canvas>
+                <div style="font-size:10px;opacity:0.7;margin-top:6px;">
+                    Source: CPCB (NAMP Annual Reports)
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- HOURLY -->
+        <section id="page-hourly" class="page">
+            <div class="card card-wide">
+                <h3>Hourly AQI</h3>
+                <small>24-hour variation</small>
+                <canvas id="hourlyCanvas"></canvas>
+            </div>
+        </section>
+
+        <!-- DAILY -->
+        <section id="page-daily" class="page">
+            <div class="card card-wide">
+                <h3>Daily AQI</h3>
+                <small>Short-term trend</small>
+                <canvas id="dailyCanvas"></canvas>
+            </div>
+        </section>
+
+        <!-- MONTHLY -->
+        <section id="page-monthly" class="page">
+            <div class="card card-wide">
+                <h3>Monthly AQI</h3>
+                <small>Longer trend overview</small>
+                <canvas id="monthlyCanvas"></canvas>
+            </div>
+        </section>
+
+        <!-- forecast FULL -->
+        <section id="page-prediction" class="page">
+            <div class="card card-wide">
+                <h3>🌤 AQI Forecast</h3>
+                <small>Next 2 days (OpenWeather)</small>
+                <canvas id="forecastCanvas"></canvas>
+            </div>
+        </section>
+
+
+        <!-- ADVANCED HUB -->
+        <section id="page-advanced" class="page">
+            <div class="card card-wide" style="background:transparent;border:none;box-shadow:none;padding:0;">
+                <h3>Advanced Analytics & Tools</h3>
+                <small>Jump quickly into detailed views</small>
+            </div>
+            <div class="adv-grid">
+                <div class="adv-card" onclick="showPage('heatmap')">
+                    <h4>Heatmap – 7 Day AQI</h4>
+                    <p>Color-coded view of hourly AQI patterns for each day of the week.</p>
+                </div>
+                <div class="adv-card" onclick="showPage('compare')">
+                    <h4>Compare States</h4>
+                    <p>Side-by-side AQI comparison to see which region is performing better.</p>
+                </div>
+                <div class="adv-card" onclick="showPage('analytics')">
+                    <h4>Analytics Dashboard</h4>
+                    <p>Trend analyzer for last 24 hours, 7 days and 30 days.</p>
+                </div>
+                <div class="adv-card" onclick="showPage('ai')">
+                    <h4>AI Insights Center</h4>
+                    <p>AI-based cause explanation, safe hours and health ratings.</p>
+                </div>
+                <div class="adv-card" onclick="showPage('tools')">
+                    <h4>Tools & Themes</h4>
+                    <p>Export data, pin states and customize the dashboard theme.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HEATMAP -->
+        <section id="page-heatmap" class="page">
+            <div class="card card-wide">
+                <h3>AQI Heat Timeline</h3>
+                <small>Hours × last 7 days</small>
+                <div id="timelineGrid" class="timeline-grid"></div>
+
+                <!-- legend -->
+                <div id="heatLegend">
+                    <span><span class="leg-box" style="background:#1e9e30;"></span>Good (0–80)</span>
+                    <span><span class="leg-box" style="background:#c7d435;"></span>Moderate (81–120)</span>
+                    <span><span class="leg-box" style="background:#f39c12;"></span>Poor (121–160)</span>
+                    <span><span class="leg-box" style="background:#e74c3c;"></span>Very Poor (161–200)</span>
+                    <span><span class="leg-box" style="background:#8e0000;"></span>Hazardous (&gt;200)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPARE -->
+        <section id="page-compare" class="page">
+            <div class="card card-wide">
+                <h3>Compare States</h3>
+                <small>Side-by-side AQI</small>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                    <select id="cmp1" style="flex:1;min-width:150px;padding:6px;border-radius:7px;border:1px solid rgba(255,255,255,0.25);background:#02071a;color:var(--text);font-size:12px;">
+                          <option value="" selected disabled>Choose State (India)</option>
+  <option value="Andhra Pradesh">Andhra Pradesh</option>
+  <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+  <option value="Assam">Assam</option>
+  <option value="Bihar">Bihar</option>
+  <option value="Chhattisgarh">Chhattisgarh</option>
+  <option value="Goa">Goa</option>
+  <option value="Gujarat">Gujarat</option>
+  <option value="Haryana">Haryana</option>
+  <option value="Himachal Pradesh">Himachal Pradesh</option>
+  <option value="Jharkhand">Jharkhand</option>
+  <option value="Karnataka">Karnataka</option>
+  <option value="Kerala">Kerala</option>
+  <option value="Madhya Pradesh">Madhya Pradesh</option>
+  <option value="Maharashtra">Maharashtra</option>
+  <option value="Manipur">Manipur</option>
+  <option value="Meghalaya">Meghalaya</option>
+  <option value="Mizoram">Mizoram</option>
+  <option value="Nagaland">Nagaland</option>
+  <option value="Odisha">Odisha</option>
+  <option value="Punjab">Punjab</option>
+  <option value="Rajasthan">Rajasthan</option>
+  <option value="Sikkim">Sikkim</option>
+  <option value="Tamil Nadu">Tamil Nadu</option>
+  <option value="Telangana">Telangana</option>
+  <option value="Tripura">Tripura</option>
+  <option value="Uttar Pradesh">Uttar Pradesh</option>
+  <option value="Uttarakhand">Uttarakhand</option>
+  <option value="West Bengal">West Bengal</option>
+  <option value="Delhi">Delhi</option>
+  <option value="Puducherry">Puducherry</option>
+  <option value="Chandigarh">Chandigarh</option>
+  <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+  <option value="Ladakh">Ladakh</option>
+  <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                    </select>
+                    <select id="cmp2" style="flex:1;min-width:150px;padding:6px;border-radius:7px;border:1px solid rgba(255,255,255,0.25);background:#02071a;color:var(--text);font-size:12px;">
+                          <option value="" selected disabled>Choose State (India)</option>
+  <option value="Andhra Pradesh">Andhra Pradesh</option>
+  <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+  <option value="Assam">Assam</option>
+  <option value="Bihar">Bihar</option>
+  <option value="Chhattisgarh">Chhattisgarh</option>
+  <option value="Goa">Goa</option>
+  <option value="Gujarat">Gujarat</option>
+  <option value="Haryana">Haryana</option>
+  <option value="Himachal Pradesh">Himachal Pradesh</option>
+  <option value="Jharkhand">Jharkhand</option>
+  <option value="Karnataka">Karnataka</option>
+  <option value="Kerala">Kerala</option>
+  <option value="Madhya Pradesh">Madhya Pradesh</option>
+  <option value="Maharashtra">Maharashtra</option>
+  <option value="Manipur">Manipur</option>
+  <option value="Meghalaya">Meghalaya</option>
+  <option value="Mizoram">Mizoram</option>
+  <option value="Nagaland">Nagaland</option>
+  <option value="Odisha">Odisha</option>
+  <option value="Punjab">Punjab</option>
+  <option value="Rajasthan">Rajasthan</option>
+  <option value="Sikkim">Sikkim</option>
+  <option value="Tamil Nadu">Tamil Nadu</option>
+  <option value="Telangana">Telangana</option>
+  <option value="Tripura">Tripura</option>
+  <option value="Uttar Pradesh">Uttar Pradesh</option>
+  <option value="Uttarakhand">Uttarakhand</option>
+  <option value="West Bengal">West Bengal</option>
+  <option value="Delhi">Delhi</option>
+  <option value="Puducherry">Puducherry</option>
+  <option value="Chandigarh">Chandigarh</option>
+  <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+  <option value="Ladakh">Ladakh</option>
+  <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                    </select>
+                    <button style="padding:6px 10px;border-radius:7px;border:none;background:var(--accent);color:#000;font-size:12px;cursor:pointer;"
+                        onclick="runCompare()">Compare</button>
+                </div>
+                <div id="compareResult" style="margin-top:8px;font-size:12px;"></div>
+            </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section id="page-analytics" class="page">
+            <div class="cards-row">
+                <div class="card card-half">
+                    <h3>Trend Analyzer</h3>
+                    <small>24h / 7d change</small>
+                    <div id="trendAnalyzer" style="margin-top:8px;font-size:12px;">
+                        Select a state to view trend analysis.
+                    </div>
+                </div>
+                <div class="card card-half">
+                    <h3>Analytics Snapshot</h3>
+                    <small>Key stats</small>
+                    <div id="analyticsSummary" style="margin-top:8px;font-size:12px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI INSIGHTS -->
+        <section id="page-ai" class="page">
+            <div class="cards-row">
+                <div class="card card-half">
+                    <h3>AI Cause Explanation</h3>
+                    <small>Why AQI might be high</small>
+                    <div id="aiCause" style="margin-top:6px;font-size:12px;">
+                        Load a state to see cause explanation.
+                    </div>
+                </div>
+                <div class="card card-half">
+                    <h3>Safe Hours Predictor</h3>
+                    <small>Best time to go out</small>
+                    <div id="safeHours" style="margin-top:6px;font-size:12px;"></div>
+                </div>
+            </div>
+
+            <div class="cards-row" style="margin-top:16px;">
+                <div class="card card-half">
+                    <h3>Mask Recommendation</h3>
+                    <small>Mask index</small>
+                    <div id="maskIndex" style="margin-top:6px;font-size:12px;"></div>
+                </div>
+                <div class="card card-half">
+                    <h3>Indoor vs Outdoor Safety</h3>
+                    <small>Score based on AQI</small>
+                    <div id="safetyScore" style="margin-top:6px;font-size:12px;"></div>
+                </div>
+            </div>
+
+            <div class="card card-half" style="margin-top:16px;">
+                <h3>Health Safety Rating</h3>
+                <small>Star rating</small>
+                <div id="healthStars" style="margin-top:8px;font-size:14px;"></div>
+            </div>
+        </section>
+
+        <!-- TOOLS & THEMES -->
+        <section id="page-tools" class="page">
+            <div class="cards-row">
+                <div class="card card-half">
+                    <h3>Export Data</h3>
+                    <small>Download AQI sample for current state</small>
+                    <button class="sb-btn" style="margin-top:8px;" onclick="exportJSON()">Download JSON</button>
+                    <button class="sb-btn" onclick="exportCSV()">Download CSV</button>
+                </div>
+                <div class="card card-half">
+                    <h3>Pinned States</h3>
+                    <small>Track favourites</small>
+                    <button class="sb-btn" style="margin-top:8px;" onclick="pinCurrent()">Pin Current State</button>
+                    <div id="pinList" style="margin-top:6px;font-size:12px;"></div>
+                </div>
+            </div>
+
+            <div class="card card-half" style="margin-top:16px;max-width:420px;">
+                <h3>Theme Marketplace</h3>
+                <small>Instant recolor</small>
+                <select id="themeSelector"
+                        style="margin-top:8px;width:100%;padding:7px;border-radius:7px;border:1px solid rgba(255,255,255,0.25);background:#02071a;color:var(--text);font-size:12px;"
+                        onchange="applyTheme(this.value,true)">
+                    <option value="default">Cyber Neon</option>
+                    <option value="sunset">Sunset Glow</option>
+                    <option value="ocean">Aqua Breeze</option>
+                    <option value="purple">Purple Galaxy</option>
+                    <option value="darkmatter">Dark Matter</option>
+                    <option value="white">White Matter</option>
+                </select>
+            </div>
+        </section>
+
+        <div class="footer">@2025 AirAware. All rights reserved.</div>
+    </main>
+</div>
+
+<!-- POPUP OVERLAY (ABOUT / QUERY / SHARE / FEEDBACK) -->
+<div id="popupOverlay">
+    <div id="popupBox">
+        <h3 id="popupTitle">Title</h3>
+        <small id="popupSubtitle">Subtitle</small>
+        <div id="popupContent" class="popup-actions"></div>
+        <div class="popup-close" onclick="closePopup()">Close</div>
+    </div>
+</div>
+
+<!-- CHAT FAB + WINDOW -->
+<div id="chatFab" onclick="toggleChat()">💬</div>
+<div id="chatWindow">
+    <div id="chatHeader">
+        <span>AirAware Assistant</span>
+        <span style="font-size:10px;opacity:.7;">AQI &amp; safety</span>
+    </div>
+    <div id="chatMessages"></div>
+    <div id="chatInputRow">
+        <button id="chatMic" title="Voice input" onclick="startVoice()">🎙</button>
+        <input id="chatInput" placeholder="Ask: why AQI high?"
+            onkeydown="if(event.key==='Enter') sendChat()">
+        <button id="chatSend" onclick="sendChat()">➤</button>
+    </div>
+</div>
+
+<script>
+// ---------------- GLOBALS ----------------
+const FAVORITE_STATE = "{{ favorite_state }}";
+let pieChart, homeChart, hourlyChart, dailyChart, monthlyChart, predictChart;
+let latestCurrAQI = 100;
+const YEARLY_AQI_DATA = {
+  "Andhra Pradesh": {2019: 94, 2020: 84, 2021: 88, 2022: 91, 2023: 96, 2024: 95},
+  "Arunachal Pradesh": {2019: 58, 2020: 54, 2021: 56, 2022: 59, 2023: 61, 2024: 60},
+  "Assam": {2019: 92, 2020: 86, 2021: 89, 2022: 93, 2023: 97, 2024: 95},
+  "Bihar": {2019: 112, 2020: 103, 2021: 106, 2022: 109, 2023: 114, 2024: 112},
+  "Chhattisgarh": {2019: 87, 2020: 81, 2021: 84, 2022: 88, 2023: 91, 2024: 90},
+  "Goa": {2019: 66, 2020: 61, 2021: 63, 2022: 66, 2023: 69, 2024: 68},
+  "Gujarat": {2019: 101, 2020: 93, 2021: 96, 2022: 99, 2023: 103, 2024: 102},
+  "Haryana": {2019: 124, 2020: 112, 2021: 117, 2022: 121, 2023: 126, 2024: 124},
+  "Himachal Pradesh": {2019: 71, 2020: 66, 2021: 68, 2022: 71, 2023: 73, 2024: 72},
+  "Jharkhand": {2019: 97, 2020: 89, 2021: 92, 2022: 96, 2023: 100, 2024: 98},
+  "Karnataka": {2019: 86, 2020: 80, 2021: 83, 2022: 86, 2023: 89, 2024: 88},
+  "Kerala": {2019: 61, 2020: 55, 2021: 58, 2022: 61, 2023: 64, 2024: 63},
+  "Madhya Pradesh": {2019: 106, 2020: 99, 2021: 103, 2022: 106, 2023: 110, 2024: 108},
+  "Maharashtra": {2019: 111, 2020: 103, 2021: 106, 2022: 109, 2023: 113, 2024: 112},
+  "Manipur": {2019: 76, 2020: 71, 2021: 73, 2022: 76, 2023: 79, 2024: 78},
+  "Meghalaya": {2019: 81, 2020: 76, 2021: 78, 2022: 81, 2023: 84, 2024: 83},
+  "Mizoram": {2019: 66, 2020: 62, 2021: 64, 2022: 67, 2023: 70, 2024: 69},
+  "Nagaland": {2019: 71, 2020: 67, 2021: 69, 2022: 71, 2023: 74, 2024: 73},
+  "Odisha": {2019: 101, 2020: 96, 2021: 99, 2022: 102, 2023: 106, 2024: 104},
+  "Punjab": {2019: 127, 2020: 119, 2021: 123, 2022: 127, 2023: 130, 2024: 128},
+  "Rajasthan": {2019: 106, 2020: 99, 2021: 103, 2022: 106, 2023: 109, 2024: 108},
+  "Sikkim": {2019: 56, 2020: 51, 2021: 53, 2022: 56, 2023: 59, 2024: 58},
+  "Tamil Nadu": {2019: 89, 2020: 83, 2021: 86, 2022: 89, 2023: 93, 2024: 92},
+  "Telangana": {2019: 96, 2020: 89, 2021: 92, 2022: 95, 2023: 99, 2024: 98},
+  "Tripura": {2019: 81, 2020: 77, 2021: 79, 2022: 81, 2023: 84, 2024: 83},
+  "Uttar Pradesh": {2019: 132, 2020: 121, 2021: 126, 2022: 131, 2023: 136, 2024: 134},
+  "Uttarakhand": {2019: 91, 2020: 86, 2021: 89, 2022: 92, 2023: 95, 2024: 94},
+  "West Bengal": {2019: 96, 2020: 89, 2021: 93, 2022: 96, 2023: 100, 2024: 99},
+  "Delhi": {2019: 178, 2020: 160, 2021: 165, 2022: 170, 2023: 173, 2024: 171},
+  "Puducherry": {2019: 91, 2020: 86, 2021: 89, 2022: 91, 2023: 94, 2024: 93},
+  "Chandigarh": {2019: 112, 2020: 104, 2021: 107, 2022: 110, 2023: 113, 2024: 112},
+  "Andaman and Nicobar Islands": {2019: 51, 2020: 46, 2021: 48, 2022: 51, 2023: 54, 2024: 53},
+  "Ladakh": {2019: 56, 2020: 51, 2021: 53, 2022: 56, 2023: 59, 2024: 58},
+  "Jammu and Kashmir": {2019: 76, 2020: 71, 2021: 74, 2022: 76, 2023: 79, 2024: 78}
+};
+// ---------------- PAGE SWITCH ----------------
+function showPage(id, btn=null){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+id).classList.add('active');
+    if(btn){
+        document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ---------------- TIME LABEL HELPERS ----------------
+function buildHourlyAgoLabels(count){
+    const labels = [];
+    for (let i = count - 1; i >= 0; i--) {
+        if (i === 0) labels.push('now');
+        else labels.push(`${i} hr${i > 1 ? 's' : ''} ago`);
+    }
+    return labels;
+}
+    
+
+function buildDailyLabels(now){
+    const names = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const labels = [];
+    for(let i=6;i>=0;i--){
+        const d = new Date(now.getTime() - i*24*60*60*1000);
+        labels.push(`${names[d.getDay()]} ${d.getDate()}`);
+    }
+    return labels;
+}
+
+function buildMonthlyLabels(now, count){
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const labels = [];
+    for(let i=count-1;i>=0;i--){
+        const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+        labels.push(`${months[d.getMonth()]} ${d.getFullYear()}`);
+    }
+    return labels;
+}
+
+// ---------------- POPUPS ----------------------
+function openPopup(type){
+    const overlay=document.getElementById('popupOverlay');
+    const title=document.getElementById('popupTitle');
+    const sub=document.getElementById('popupSubtitle');
+    const body=document.getElementById('popupContent');
+
+    if(type==='about'){
+        title.textContent='About AirAware';
+        sub.textContent='Smart AQI dashboard for people, students and policymakers.';
+        body.innerHTML = `
+            <p style="font-size:12px;margin:0;">
+                AirAware combines live AQI data, pollutant breakdowns and AI-style explanations
+                to help users plan safe travel, outdoor activity and health precautions.
+            </p>
+            <p style="font-size:12px;margin:6px 0 0;">
+                For any support or collaboration, reach us at
+                <b>sharmikagangadharan@gmail.com</b>.
+            </p>
+        `;
+    }
+    else if(type==='query'){
+        title.textContent='Send a Query';
+        sub.textContent='Your query will be sent to sharmikagangadharan@gmail.com.';
+        body.innerHTML = `
+            <input class="popup-input" id="queryEmail" placeholder="Your email">
+            <textarea class="popup-text" id="queryText" placeholder="Write your query..."></textarea>
+            <button class="popup-btn" onclick="submitQuery()">Submit</button>
+        `;
+    }
+    else if(type==='feedback'){
+        title.textContent='Feedback';
+        sub.textContent='Your feedback will be sent to sharmikagangadharan@gmail.com.';
+        body.innerHTML = `
+            <input class="popup-input" id="fbEmail" placeholder="Your email">
+            <textarea class="popup-text" id="fbText" placeholder="Write feedback..."></textarea>
+            <button class="popup-btn" onclick="submitFeedback()">Send</button>
+        `;
+    }
+    else if(type==='share'){
+        title.textContent='Share AirAware';
+        sub.textContent='Invite others to check air quality insights.';
+        body.innerHTML = `
+            <div class="popup-share-grid">
+                <button class="popup-share-btn" onclick="shareWhatsApp()">WhatsApp</button>
+                <button class="popup-share-btn" onclick="shareEmail()">Email</button>
+                <button class="popup-share-btn" onclick="copyShareLink()">Copy Link</button>
+            </div>
+        `;
+    }
+
+    overlay.style.display='flex';
+}
+function closePopup(){
+    document.getElementById('popupOverlay').style.display='none';
+}
+
+// ---- REAL QUERY / FEEDBACK EMAIL ----
+function submitQuery(){
+    const email = document.getElementById('queryEmail').value.trim();
+    const message = document.getElementById('queryText').value.trim();
+    fetch('http://127.0.0.1:5000/api/query',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email, message})
+    }).then(r=>r.json()).then(res=>{
+        if(res.ok){
+            alert('Query sent successfully!');
+            closePopup();
+        }else{
+            alert(res.error || 'Error sending query.');
+        }
+    }).catch(()=>{
+        alert('Server error while sending query.');
+    });
+}
+
+function submitFeedback(){
+    const email = document.getElementById('fbEmail').value.trim();
+    const message = document.getElementById('fbText').value.trim();
+    fetch('/api/feedback',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email, message})
+    }).then(r=>r.json()).then(res=>{
+        if(res.ok){
+            alert('Feedback sent successfully!');
+            closePopup();
+        }else{
+            alert(res.error || 'Error sending feedback.');
+        }
+    }).catch(()=>{
+        alert('Server error while sending feedback.');
+    });
+}
+
+// ---------------- CHATBOT (LLAMA) ---------------------
+function toggleChat(){
+    const win = document.getElementById('chatWindow');
+    win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+}
+
+function sendChat(){
+    
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if(!msg) return;
+
+    addUser(msg);
+    input.value = '';
+
+    fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if(res.ok){
+            addBot(res.reply);
+        } else {
+            addBot(res.reply || res.error || 'AI server error.');
+        }
+    })
+    .catch(() => {
+        addBot('Server error while contacting AI.');
+    });
+}
+
+function addUser(t){
+    const box = document.getElementById('chatMessages');
+    box.innerHTML += `<div class="chat-user">${escapeHTML(t)}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function addBot(t){
+    const box = document.getElementById('chatMessages');
+    box.innerHTML += `<div class="chat-bot">${t}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function startVoice(){
+    if(!('webkitSpeechRecognition' in window)){
+        alert('Voice not supported in this browser.');
+        return;
+    }
+
+    const rec = new webkitSpeechRecognition();
+    rec.lang = 'en-IN';
+    rec.start();
+
+    rec.onresult = (e) => {
+        const t = e.results[0][0].transcript;
+        document.getElementById('chatInput').value = t;
+        sendChat();
+    };
+}
+function escapeHTML(str){
+    return str.replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+}
+// --------------- THEME ENGINE -----------------
+const THEMES={
+    default:{bg1:'#030730',bg2:'#001a3c',card:'#050b24',text:'#bfefff',accent:'#00eaff',glow:'#00eaff'},
+    sunset:{bg1:'#33001b',bg2:'#ff512f',card:'#3d0618',text:'#ffe6e6',accent:'#ff9a76',glow:'#ffa08c'},
+    ocean:{bg1:'#001f33',bg2:'#0099cc',card:'#012a40',text:'#d7faff',accent:'#57e1ff',glow:'#57e1ff'},
+    purple:{bg1:'#1c0033',bg2:'#5500aa',card:'#2a0050',text:'#edd9ff',accent:'#d177ff',glow:'#eab0ff'},
+    darkmatter:{bg1:'#000000',bg2:'#0a0a0a',card:'#111111',text:'#dddddd',accent:'#888888',glow:'#ffffff'},
+    white: {bg1: '#ffffff', bg2: '#f1f5f9', card: '#ffffff', text: '#2581d8ff',  accent: '#2563eb',  glow: '#2563eb'}
+};
+function applyTheme(name,save){
+    const th=THEMES[name] || THEMES.default;
+    const root=document.documentElement.style;
+    root.setProperty('--bg1',th.bg1);
+    root.setProperty('--bg2',th.bg2);
+    root.setProperty('--card',th.card);
+    root.setProperty('--text',th.text);
+    root.setProperty('--accent',th.accent);
+    root.setProperty('--glow',th.glow);
+    if(save) localStorage.setItem('theme',name);
+}
+const savedTheme=localStorage.getItem('theme') || 'default';
+applyTheme(savedTheme,false);
+document.getElementById('themeSelector').value=savedTheme;
+
+// --------------- SHARE HELPERS ----------------
+function shareWhatsApp() {
+    const state = document.getElementById("stateSelect")?.value || "your state";
+    const aqi = document.getElementById("currAQI")?.textContent || "N/A";
+
+    const message = `
+🌍 AirAware – AQI Dashboard
+
+📍 State: ${state}
+🌫 Current AQI: ${aqi}
+
+Check live air quality data here 👇
+${window.location.origin}
+    `;
+
+    const encodedMsg = encodeURIComponent(message.trim());
+
+    window.open(
+        `https://wa.me/?text=${encodedMsg}`,
+        "_blank"
+    );
+}
+
+function shareEmail() {
+    const state =
+        document.getElementById("stateSelect")?.value || "your state";
+
+    const aqi =
+        document.getElementById("currAQI")?.textContent || "N/A";
+
+    const link = window.location.origin;
+
+    const subject = encodeURIComponent("AirAware – AQI Dashboard");
+
+    const body = encodeURIComponent(
+`Hello,
+
+I wanted to share the AirAware AQI Dashboard with you.
+
+State: ${state}
+Current AQI: ${aqi}
+
+View live air quality data here:
+${link}
+
+— Shared via AirAware`
+    );
+
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+function copyShareLink(){
+    const link=window.location.origin + '/';
+    if(navigator.clipboard){
+        navigator.clipboard.writeText(link).then(()=>alert('Link copied to clipboard.'));
+    }else{
+        alert('Share this link: '+link);
+    }
+}
+
+// --------------- CHARTS INIT ----------------
+function initCharts(){
+    pieChart=new Chart(document.getElementById('pieCanvas'),{
+        type:'pie',
+        data:{
+            labels:['PM2.5','PM10','NO₂','SO₂'],
+            datasets:[{
+                data:[25,25,25,25],
+                backgroundColor:['#00eaff','#0088ff','#7b4fff','#ff4fd4']
+            }]
+        }
+    });
+
+
+    hourlyChart=new Chart(document.getElementById('hourlyCanvas'),{
+        type:'line',
+        data:{labels:[],datasets:[{label:'Hourly AQI',data:[],borderColor:'#00eaff',tension:0.3}]},
+        options:{plugins:{legend:{display:false}}}
+    });
+
+    dailyChart=new Chart(document.getElementById('dailyCanvas'),{
+        type:'line',
+        data:{labels:[],datasets:[{label:'Daily AQI',data:[],borderColor:'#00eaff',tension:0.3}]},
+        options:{plugins:{legend:{display:false}}}
+    });
+
+    monthlyChart=new Chart(document.getElementById('monthlyCanvas'),{
+        type:'line',
+        data:{labels:[],datasets:[{label:'Monthly AQI',data:[],borderColor:'#00eaff',tension:0.3}]},
+        options:{plugins:{legend:{display:false}}}
+    });
+
+    
+}
+
+// --------------- AQI HELPERS (same text logic) -------------
+function getAQICategory(aqi){
+    if(aqi<=80) return 'Good';
+    if(aqi<=120) return 'Moderate';
+    if(aqi<=160) return 'Poor';
+    if(aqi<=200) return 'Very Poor';
+    return 'Hazardous';
+}
+function aiCauseExplain(aqi){
+    if(aqi<=80) return 'Clean conditions and low emissions keep AQI healthy.';
+    if(aqi<=120) return 'Traffic and mild dust are slightly increasing pollution.';
+    if(aqi<=160) return 'Urban traffic, industry and construction dust push AQI up.';
+    return 'High traffic, stagnant air and local emissions make air very polluted.';
+}
+function safeHoursText(aqi){
+    if(aqi<=80) return 'Anytime is safe for outdoor activity.';
+    if(aqi<=120) return 'Best hours: 6–10 AM and after 7 PM.';
+    if(aqi<=160) return 'Better: 6–8 AM only. Avoid noon heat.';
+    return 'Try to stay indoors; only essential outdoor movement.';
+}
+function maskText(aqi){
+    if(aqi<=80) return 'Mask not required.';
+    if(aqi<=120) return 'Light mask recommended for sensitive groups.';
+    if(aqi<=160) return 'Use surgical or KN95 outside for long duration.';
+    return 'N95 recommended for all when going outdoors.';
+}
+function safetyScore(aqi){
+    const indoor=Math.max(20,220-aqi);
+    const outdoor=Math.max(5,160-aqi);
+    return "Indoor safety: ${indoor}% | Outdoor safety: ${outdoor}%";
+}
+function starRating(aqi){
+    if(aqi<=80) return '⭐⭐⭐⭐☆';
+    if(aqi<=120) return '⭐⭐⭐☆☆';
+    if(aqi<=160) return '⭐⭐☆☆☆';
+    return '⭐☆☆☆☆';
+}
+
+// --------------- FETCH AQI FROM BACKEND ----------------
+
+
+function onStateChange(){
+    const state = document.getElementById('stateSelect').value;
+    
+    if(!state) return;
+
+    fetch('http://127.0.0.1:5000/api/aqi?state='+encodeURIComponent(state))
+      .then(r=>r.json())
+      .then(res=>{
+          if(!res.ok){
+            alert('Error getting AQI');
+            return;
+        }
+
+          const data = res.data;  
+          latestCurrAQI = data.curr;
+          
+          loadHealthAdvisory(data.curr);
+          loadAQIHistory();
+
+
+          renderTrendAnalyzer(data);
+          renderAnalyticsSummary(data)
+          const now = new Date(data.timestamp || Date.now());
+
+          // SUMMARY
+          document.getElementById('tempValue').textContent = data.temp+' °C';
+          document.getElementById('minAQI').textContent = data.min;
+          document.getElementById('currAQI').textContent = data.curr;
+          document.getElementById('maxAQI').textContent = data.max;
+          document.getElementById('lastUpdated').textContent = now.toLocaleString();
+
+          const catSpan=document.getElementById('aqiCategory');
+          const cat=getAQICategory(data.curr);
+          catSpan.textContent=cat;
+
+          const hb=document.getElementById('healthBanner');
+          if(data.curr>120){
+              hb.style.display='block';
+              hb.textContent='⚠ Air quality is unhealthy. Limit outdoor exercise.';
+          }else hb.style.display='none';
+
+          
+          document.getElementById('aiRecoText').textContent =
+            (data.curr>160?'Avoid outdoor exercise and wear N95 mask if you go out.':
+             data.curr>120?'Prefer morning or late evening; keep windows closed near roads.':
+             'Air looks safe, normal outdoor routine is okay.');
+
+          document.getElementById('aiCause').textContent=aiCauseExplain(data.curr);
+          document.getElementById('safeHours').textContent=safeHoursText(data.curr);
+          document.getElementById('maskIndex').textContent=maskText(data.curr);
+          document.getElementById('safetyScore').textContent=safetyScore(data.curr);
+          document.getElementById('healthStars').textContent=starRating(data.curr);
+
+          // POLLUTANT PIE
+          pieChart.data.datasets[0].data = data.pollutants;
+          pieChart.update();
+
+          // HOME SNAPSHOT prediction bars
+          //homeChart.data.datasets[0].data = [data.curr, data.curr+20, data.curr+40];
+          //homeChart.update();
+
+          // HOURLY with real time labels
+          const hourlyVals = data.hourly;
+
+          hourlyChart.data.labels = buildHourlyAgoLabels(hourlyVals.length);
+          hourlyChart.data.datasets[0].data = hourlyVals;
+          hourlyChart.update();
+
+          // DAILY last 7 days with weekday + date
+          const dailyVals = data.daily.slice(0,7);
+          dailyChart.data.labels = buildDailyLabels(now);
+          dailyChart.data.datasets[0].data = dailyVals;
+          dailyChart.update();
+
+          // MONTHLY last 6 months with month + year
+          const monthlyVals = data.monthly.slice(-6); // last 6
+          monthlyChart.data.labels = buildMonthlyLabels(now, monthlyVals.length);
+          monthlyChart.data.datasets[0].data = monthlyVals;
+          monthlyChart.update();
+          buildHeatmap(data.heatmap)
+          renderYearlyAQIChart(state);
+          loadAQIForecast(state);
+
+
+      })
+      .catch(err=>{
+          console.error(err);
+          alert('Server error while loading AQI.');
+      });
+      
+}
+
+
+
+
+
+
+
+
+// --------------- PREDICTION (YEAR LABELS) ----------------
+function requestPrediction(){
+    const years = parseInt(document.getElementById('predictYears').value) || 5;
+    if(years<1 || years>20){
+        alert('Please enter years between 1 and 20.');
+        return;
+    }
+    const now = new Date();
+    const labels=[];
+    const values=[];
+    let base = latestCurrAQI;
+    for(let i=0;i<years;i++){
+        const year = now.getFullYear()+i;
+        labels.push(String(year));
+        base += (5 + i*3); // small increasing trend
+        values.push(base);
+    }
+    predictChart.data.labels = labels;
+    predictChart.data.datasets[0].data = values;
+    predictChart.update();
+}
+
+// --------------- EXPORT / PINS / HEATMAP (same as before) --
+function heatColor(v){
+    if(v<=80) return '#1e9e30';
+    if(v<=120) return '#c7d435';
+    if(v<=160) return '#f39c12';
+    if(v<=200) return '#e74c3c';
+    return '#8e0000';
+}
+function buildHeatmap(heatmapData){
+    const grid = document.getElementById('timelineGrid');
+    grid.innerHTML = '';
+
+    const hours = ['6AM','9AM','12PM','3PM','6PM','9PM'];
+
+    grid.innerHTML += `<div></div>${hours.map(h => `<div>${h}</div>`).join('')}`;
+
+    heatmapData.forEach(row => {
+        grid.innerHTML += `<div>${row.day}</div>`;
+
+        row.values.forEach(v => {
+            grid.innerHTML += `
+              <div class="timeline-cell" style="background:${heatColor(v)}">
+                ${v}
+              </div>`;
+        });
+    });
+}
+
+
+function runCompare(){
+    const s1 = document.getElementById('cmp1').value;
+    const s2 = document.getElementById('cmp2').value;
+
+    if(!s1 || !s2){
+        document.getElementById('compareResult').textContent = 'Select two states.';
+        return;
+    }
+
+    fetch(`/api/compare?state1=${encodeURIComponent(s1)}&state2=${encodeURIComponent(s2)}`)
+      .then(r => r.json())
+      .then(res => {
+        if(!res.ok){
+            document.getElementById('compareResult').textContent = 'Comparison failed.';
+            return;
+        }
+
+        const a = res.data.state1;
+        const b = res.data.state2;
+
+        const better = (x, y) => x < y ? '✅ Cleaner' : y < x ? '❌ Worse' : '⚖ Same';
+
+        document.getElementById('compareResult').innerHTML = `
+          <b>${a.name} vs ${b.name}</b><br><br>
+
+          AQI: ${a.aqi} vs ${b.aqi} → ${better(a.aqi,b.aqi)}<br>
+          PM2.5: ${a.pm25} vs ${b.pm25} → ${better(a.pm25,b.pm25)}<br>
+          PM10: ${a.pm10} vs ${b.pm10} → ${better(a.pm10,b.pm10)}<br>
+          NO₂: ${a.no2} vs ${b.no2} → ${better(a.no2,b.no2)}<br>
+          SO₂: ${a.so2} vs ${b.so2} → ${better(a.so2,b.so2)}<br>
+        `;
+      })
+      .catch(() => {
+        document.getElementById('compareResult').textContent = 'Server error.';
+      });
+}
+
+
+function exportJSON(){
+    const state=document.getElementById('stateSelect').value || 'Delhi';
+    fetch('/api/aqi?state='+encodeURIComponent(state))
+      .then(r=>r.json()).then(res=>{
+        if(!res.ok){alert('Error exporting.');return;}
+        const data=res.data;
+        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;a.download='aqi-'+state+'.json';a.click();
+        URL.revokeObjectURL(url);
+      });
+}
+function exportCSV(){
+    const state=document.getElementById('stateSelect').value || 'Delhi';
+    fetch('/api/aqi?state='+encodeURIComponent(state))
+      .then(r=>r.json()).then(res=>{
+        if(!res.ok){alert('Error exporting.');return;}
+        const d=res.data;
+        let csv='key,value\n';
+        csv+="state,${d.state}\n";
+        csv+="temp,${d.temp}\n";
+        csv+="curr,${d.curr}\n";
+        csv+="min,${d.min}\n";
+        csv+="max,${d.max}\n";
+        const blob=new Blob([csv],{type:'text/csv'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;a.download='aqi-'+state+'.csv';a.click();
+        URL.revokeObjectURL(url);
+      });
+}
+function pinCurrent(){
+    const st=document.getElementById('stateSelect').value;
+    if(!st){alert('Choose a state first.');return;}
+    let pins=JSON.parse(localStorage.getItem('airawarePins')||'[]');
+    if(!pins.includes(st)) pins.push(st);
+    localStorage.setItem('airawarePins',JSON.stringify(pins));
+    renderPins();
+}
+function renderPins(){
+    const pins=JSON.parse(localStorage.getItem('airawarePins')||'[]');
+    document.getElementById('pinList').innerHTML = pins.length? pins.join('<br>') : 'No pinned states yet.';
+}
+(function fillCompare(){
+    const opts=document.querySelectorAll('#stateSelect option');
+    const c1=document.getElementById('cmp1');
+    const c2=document.getElementById('cmp2');
+    opts.forEach(o=>{
+        if(o.value){
+            c1.innerHTML+="<option>${o.value}</option>";
+            c2.innerHTML+="<option>${o.value}</option>";
+        }
+    });
+})();
+
+// download main chart (snapshot)
+function downloadYearlyAQIChart() {
+    const canvas = document.getElementById('yearlyAqiCanvas');
+
+    if (!canvas) {
+        alert("Chart not available yet");
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.download = 'airaware-yearly-aqi.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+function percentChange(oldVal, newVal){
+    if(oldVal === 0 || oldVal == null || newVal == null) return 0;
+    return (((newVal - oldVal) / oldVal) * 100).toFixed(1);
+}
+
+//trend analyzer
+function renderTrendAnalyzer(data){
+    const hourly = data.hourly;
+    const daily = data.daily;
+
+    if(!hourly || hourly.length < 2 || !daily || daily.length < 2){
+        document.getElementById('trendAnalyzer').textContent =
+            'Not enough data for trend analysis.';
+        return;
+    }
+
+    // --- 24h change ---
+    const aqi24Old = hourly[0];
+    const aqi24New = hourly[hourly.length - 1];
+    const change24 = percentChange(aqi24Old, aqi24New);
+
+    // --- 7d change ---
+    const aqi7Old = daily[0];
+    const aqi7New = daily[daily.length - 1];
+    const change7 = percentChange(aqi7Old, aqi7New);
+
+    const arrow24 = change24 > 0 ? '⬆️' : change24 < 0 ? '⬇️' : '➖';
+    const arrow7 = change7 > 0 ? '⬆️' : change7 < 0 ? '⬇️' : '➖';
+
+    document.getElementById('trendAnalyzer').innerHTML = `
+        <b>24-Hour Trend</b><br>
+        AQI: ${aqi24Old} → ${aqi24New} 
+        <b>${arrow24} ${Math.abs(change24)}%</b><br><br>
+
+        <b>7-Day Trend</b><br>
+        AQI: ${aqi7Old} → ${aqi7New} 
+        <b>${arrow7} ${Math.abs(change7)}%</b>
+    `;
+}
+
+
+function renderAnalyticsSummary(data){
+    const avg24 = Math.round(
+        data.hourly.reduce((a,b)=>a+b,0) / data.hourly.length
+    );
+    const avg7 = Math.round(
+        data.daily.reduce((a,b)=>a+b,0) / data.daily.length
+    );
+
+    document.getElementById('analyticsSummary').innerHTML = `
+        <b>Current AQI:</b> ${data.curr}<br>
+        <b>24h Avg AQI:</b> ${avg24}<br>
+        <b>7d Avg AQI:</b> ${avg7}<br>
+        <b>Confidence:</b> ${data.confidence}%
+    `;
+}
+
+// init on load
+window.addEventListener('load',()=>{
+    initCharts();
+    
+    renderPins();
+    if (FAVORITE_STATE && FAVORITE_STATE !== "None") {
+        document.getElementById("stateSelect").value = FAVORITE_STATE;
+        onStateChange(FAVORITE_STATE);
+    } else {
+        const defaultState = "Kerala";
+        document.getElementById("stateSelect").value = defaultState;
+        onStateChange(defaultState);
+    }
+});
+
+// function loadHealthAdvisory(aqi){
+//     fetch('/api/health-advisory?aqi='+aqi)
+//       .then(r=>r.json())
+//       .then(res=>{
+//           if(res.ok){
+//                 const el = document.getElementById('healthAdviceText');
+//                 el.textContent = res.advisory;
+
+//                 // trigger animation
+//                 el.classList.remove('pulse');
+//                 void el.offsetWidth; // reflow trick
+//                 el.classList.add('pulse');
+
+//           }
+//       });
+// }
+
+function loadHealthAdvisory(aqi){
+    fetch('/api/health-advisory?aqi=' + aqi)
+      .then(r => r.json())
+      .then(res => {
+          if (!res.ok) return;
+
+          const emojiEl = document.getElementById('healthEmoji');
+          const msgEl = document.getElementById('healthAdviceMessage');
+
+          msgEl.textContent = res.advisory;
+
+          // AQI logic
+          if (aqi <= 80) {
+              emojiEl.textContent = '😄';   // Good
+          } else if (aqi <= 120) {
+              emojiEl.textContent = '🙂';   // Moderate
+          } else if (aqi <= 160) {
+              emojiEl.textContent = '😷';   // Poor
+          } else {
+              emojiEl.textContent = '☹️';   // Very poor
+          }
+      })
+      .catch(() => {
+          console.warn('Health advisory fetch failed');
+      });
+}
+
+
+function loadAQIHistory(){
+    fetch('/api/aqi-history')
+      .then(r=>r.json())
+      .then(res=>{
+          const el = document.getElementById('aqiHistory'); 
+          if(!res.ok || res.history.length===0){
+              el.textContent = 'No history yet.';
+              
+              return;
+          }
+
+          el.innerHTML = res.history
+            .map(h => `${h.state} – AQI ${h.aqi}`)
+            .join('<br>');
+
+          // 🔹 animation trigger
+          el.classList.remove('pulse');
+          void el.offsetWidth;
+          el.classList.add('pulse');
+          
+      });
+}
+
+
+let yearlyAqiChart = null;
+
+function renderYearlyAQIChart(state) {
+    const stateData = YEARLY_AQI_DATA[state];
+
+    // If state not found (safety check)
+    if (!stateData) {
+        console.warn("No yearly AQI data for:", state);
+        return;
+    }
+
+    const labels = Object.keys(stateData);   // years
+    const values = Object.values(stateData); // AQI values
+
+    const ctx = document
+        .getElementById("yearlyAqiCanvas")
+        .getContext("2d");
+
+    // Destroy old chart before creating new one
+    if (yearlyAqiChart) {
+        yearlyAqiChart.destroy();
+    }
+
+    yearlyAqiChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: `Yearly Avg AQI – ${state}`,
+                data: values,
+                tension: 0.35,
+                fill: true,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: "AQI"
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: "Year"
+                    }
+                }
+            }
+        }
+    });
+}
+
+const I18N = {
+  en: {
+    aqiSummary: "AQI Summary",
+    aiRecommendation: "AI Recommendation",
+    healthAdvisory: "Health Advisory",
+    aqiHistory: "Your AQI History",
+    home: "Home",
+    hourly: "Hourly AQI",
+    daily: "Daily AQI",
+    monthly: "Monthly AQI",
+    prediction: "Forecast",
+    aqi_summary: "AQI Summary",
+    health_advisory: "Health Advisory",
+    ai_reco: "AI Recommendation",
+    hourly_title: "Hourly AQI",
+    daily_title: "Daily AQI",
+    monthly_title: "Monthly AQI",
+    pollutantMix: "Pollutant Mix – Pie Chart",
+    predictionSnapshot: "Prediction – Snapshot",
+    advanced: "Advanced",
+    advancedHub: "Advanced Hub",
+    heatmap: "Heatmap",
+    compareStates: "Compare States",
+    analytics: "Analytics",
+    aiInsights: "Insights",
+    toolsThemes: "Tools & Themes",
+    extras: "Extras",
+    aboutUs: "About Us",
+    query: "Query",
+    share: "Share",
+    feedback: "Feedback",
+    views: "Views"
+  },
+  hi: {
+    
+    aiRecommendation: "एआई सुझाव",
+    healthAdvisory: "स्वास्थ्य सलाह",
+    aqiHistory: "आपका AQI इतिहास",
+    home: "होम",
+    hourly: "प्रति घंटे AQI",
+    daily: "दैनिक AQI",
+    monthly: "मासिक AQI",
+    prediction: "पूर्वानुमान",
+    aqiSummary: "AQI सारांश",
+    ai_reco: "एआई सुझाव",
+    hourly_title: "प्रति घंटे AQI",
+    daily_title: "दैनिक AQI",
+    monthly_title: "मासिक AQI",
+    pollutantMix: "प्रदूषक मिश्रण – पाई चार्ट",
+    predictionSnapshot: "अनुमान – स्नैपशॉट",
+    advanced: "उन्नत",
+    advancedHub: "उन्नत हब",
+    heatmap: "हीटमैप",
+    compareStates: "राज्यों की तुलना",
+    analytics: "विश्लेषण",
+    aiInsights: "एआई अंतर्दृष्टि",
+    toolsThemes: "उपकरण और थीम",
+    extras: "अतिरिक्त",
+    aboutUs: "हमारे बारे में",
+    query: "प्रश्न",
+    share: "साझा करें",
+    feedback: "प्रतिक्रिया",
+    views: "दृश्य"
+
+  },
+  te: {
+    aqiSummary: "వాయు నాణ్యత సంగ్రహం",
+    aiRecommendation: "AI సిఫార్సు",
+    healthAdvisory: "ఆరోగ్య సూచనలు",
+    aqiHistory: "మీ AQI చరిత్ర",
+    home: "హోమ్",
+    hourly: "గంటల వారీ AQI",
+    daily: "రోజువారీ AQI",
+    monthly: "నెలవారీ AQI",
+    prediction: "అంచనా",
+    compare: "రాష్ట్రాల పోలిక",
+    pollutantMix: "కాలుష్య మిశ్రమం – పై చార్ట్",
+    predictionSnapshot: "అంచనా – స్నాప్‌షాట్",
+    advanced: "అధునాతన",
+    advancedHub: "అధునాతన హబ్",
+    heatmap: "హీట్‌మ్యాప్",
+    compareStates: "రాష్ట్రాల పోలిక",
+    analytics: "విశ్లేషణలు",
+    aiInsights: "AI అవగాహన",
+    toolsThemes: "పరికరాలు & థీమ్స్",
+    extras: "అదనపు",
+    aboutUs: "మా గురించి",
+    query: "ప్రశ్న",
+    share: "పంచుకోండి",
+    feedback: "ప్రతిస్పందన",
+    views: "వ్యూస్"
+
+  },
+
+  ta: {
+  views: "காட்சிகள்",
+  advanced: "மேம்பட்டது",
+  extras: "கூடுதல்",
+  home: "முகப்பு",
+  hourly: "மணிநேர AQI",
+  daily: "தினசரி AQI",
+  monthly: "மாதாந்திர AQI",
+  prediction: "முன்னறிவு",
+  aqiSummary: "காற்றுத் தர சுருக்கம்",
+  aiRecommendation: "AI பரிந்துரை",
+  healthAdvisory: "ஆரோக்கிய அறிவுரை",
+  aqiHistory: "உங்கள் AQI வரலாறு",
+  pollutantMix: "மாசு கலவை – பை சார்ட்",
+  predictionSnapshot: "முன்னறிவு – சுருக்கம்",
+  aboutUs: "எங்களைப் பற்றி",
+  query: "வினா",
+  share: "பகிர்",
+  feedback: "கருத்து",
+  advancedHub: "மேம்பட்ட மையம்",
+  heatmap: "வெப்ப வரைபடம்",
+  compareStates: "மாநிலங்களை ஒப்பிடு",
+  analytics: "பகுப்பாய்வு",
+  aiInsights: "AI பார்வைகள்",
+  toolsThemes: "கருவிகள் & தீம்கள்"
+
+},
+
+kn: {
+  views: "ನೋಟಗಳು",
+  advanced: "ಮುನ್ನಡೆದ",
+  extras: "ಹೆಚ್ಚುವರಿ",
+  home: "ಮುಖಪುಟ",
+  hourly: "ಗಂಟೆಗೊಮ್ಮೆ AQI",
+  daily: "ದೈನಂದಿನ AQI",
+  monthly: "ಮಾಸಿಕ AQI",
+  prediction: "ಭವಿಷ್ಯವಾಣಿ",
+  aqiSummary: "ವಾಯು ಗುಣಮಟ್ಟ ಸಾರಾಂಶ",
+  aiRecommendation: "AI ಶಿಫಾರಸು",
+  healthAdvisory: "ಆರೋಗ್ಯ ಸಲಹೆ",
+  aqiHistory: "ನಿಮ್ಮ AQI ಇತಿಹಾಸ",
+  pollutantMix: "ಮಾಲಿನ್ಯ ಮಿಶ್ರಣ – ಪೈ ಚಾರ್ಟ್",
+  predictionSnapshot: "ಭವಿಷ್ಯವಾಣಿ – ಕ್ಷಣಚಿತ್ರ",
+  aboutUs: "ನಮ್ಮ ಬಗ್ಗೆ",
+  query: "ಪ್ರಶ್ನೆ",
+  share: "ಹಂಚಿಕೆ",
+  feedback: "ಪ್ರತಿಕ್ರಿಯೆ",
+  advancedHub: "ಮುನ್ನಡೆದ ಕೇಂದ್ರ",
+  heatmap: "ಹೀಟ್‌ಮ್ಯಾಪ್",
+  compareStates: "ರಾಜ್ಯಗಳ ಹೋಲಿಕೆ",
+  analytics: "ವಿಶ್ಲೇಷಣೆ",
+  aiInsights: "AI ಒಳನೋಟಗಳು",
+  toolsThemes: "ಉಪಕರಣಗಳು & ಥೀಮ್‌ಗಳು"
+},
+
+ml: {
+  views: "കാഴ്ചകൾ",
+  advanced: "ഉന്നതം",
+  extras: "കൂടുതൽ",
+  home: "ഹോം",
+  hourly: "മണിക്കൂർ AQI",
+  daily: "ദൈനംദിന AQI",
+  monthly: "മാസിക AQI",
+  prediction: "പ്രവചനം",
+  aqiSummary: "വായു ഗുണനിലവാര സംഗ്രഹം",
+  aiRecommendation: "AI ശുപാർശ",
+  healthAdvisory: "ആരോഗ്യ നിർദേശം",
+  aqiHistory: "നിങ്ങളുടെ AQI ചരിത്രം",
+  pollutantMix: "മലിനീകരണ മിശ്രിതം – പൈ ചാർട്ട്",
+  predictionSnapshot: "പ്രവചനം – സ്നാപ്‌ഷോട്ട്",
+  aboutUs: "ഞങ്ങളെ കുറിച്ച്",
+  query: "ചോദ്യം",
+  share: "പങ്കിടുക",
+  feedback: "അഭിപ്രായം",
+  advancedHub: "ഉന്നത കേന്ദ്രം",
+  heatmap: "ഹീറ്റ്‌മാപ്പ്",
+  compareStates: "സംസ്ഥാനങ്ങളെ താരതമ്യം ചെയ്യുക",
+  analytics: "വിശകലനം",
+  aiInsights: "AI അവബോധങ്ങൾ",
+  toolsThemes: "ഉപകരണങ്ങൾ & തീമുകൾ"
+}
+
+
+
+
+};
+
+function applyLanguage(lang){
+  const dict = I18N[lang];
+  if(!dict) return;
+
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.dataset.i18n;
+    if(dict[key]) el.textContent = dict[key];
+  });
+
+  localStorage.setItem('airawareLang', lang);
+}
+
+const savedLang = localStorage.getItem('airawareLang') || 'en';
+document.getElementById('languageSelect').value = savedLang;
+applyLanguage(savedLang);
+
+//set fav state
+function setFavoriteState() {
+    const state = document.getElementById("stateSelect").value;
+
+    if (!state) {
+        alert("Please select a state first");
+        return;
+    }
+
+    fetch("/api/favorite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.ok) {
+            alert(`⭐ ${state} saved as favorite`);
+        } else {
+            alert(data.error || "Failed to save favorite");
+        }
+    });
+}
+
+// forecast chart
+let forecastChart = null;
+
+function loadAQIForecast(state) {
+    fetch(`/api/aqi-forecast?state=${state}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.ok) return;
+
+            const labels = [];
+            const values = [];
+
+            data.forecast.forEach(f => {
+                const d = new Date(f.dt * 1000);
+                labels.push(
+                    d.toLocaleDateString('en-IN', {
+                        weekday: 'short',
+                        hour: 'numeric'
+                    })
+                );
+                values.push(f.aqi); // ✅ real AQI
+            });
+
+            const ctx = document
+                .getElementById("forecastCanvas")
+                .getContext("2d");
+
+            if (forecastChart) forecastChart.destroy();
+
+            forecastChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "Forecast AQI",
+                        data: values,
+                        tension: 0.35,
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: "AQI" }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(err => console.error("Forecast error:", err));
+}
+
+
+
+</script>
+
+</body>
+</html>

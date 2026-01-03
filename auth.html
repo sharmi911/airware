@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AirAware – Login / Signup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg1:#030730;
+            --bg2:#001a3c;
+            --card:#050b24;
+            --accent:#00eaff;
+            --text:#bfefff;
+        }
+        *{box-sizing:border-box;}
+        body{
+            margin:0;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-family:'Poppins',sans-serif;
+            background:radial-gradient(circle at top,#04245d 0,#020824 40%,#000111 100%);
+            color:var(--text);
+        }
+        .shell{
+            width:900px;
+            max-width:95%;
+            display:flex;
+            gap:24px;
+        }
+        .left{
+            flex:1;
+            padding:40px 30px;
+        }
+        .logo{
+            font-family:'Pacifico',cursive;
+            font-size:46px;
+            color:var(--accent);
+            text-shadow:0 0 18px rgba(0,234,255,0.8);
+        }
+        .slogan{
+            margin-top:6px;
+            font-size:14px;
+            opacity:.8;
+        }
+        .tag{
+            margin-top:20px;
+            font-size:13px;
+            line-height:1.6;
+            opacity:.8;
+        }
+        .right{
+            flex:1.2;
+            background:linear-gradient(180deg,rgba(4,14,40,0.96),rgba(3,10,32,0.96));
+            border-radius:18px;
+            box-shadow:0 22px 50px rgba(0,0,0,0.8);
+            padding:26px 28px 22px;
+            border:1px solid rgba(255,255,255,0.08);
+        }
+        .tabs{
+            display:flex;
+            gap:10px;
+            margin-bottom:18px;
+        }
+        .tab{
+            flex:1;
+            padding:8px 10px;
+            border-radius:999px;
+            text-align:center;
+            font-size:14px;
+            cursor:pointer;
+            border:1px solid transparent;
+            background:rgba(255,255,255,0.03);
+            color:var(--text);
+        }
+        .tab.active{
+            border-color:var(--accent);
+            background:rgba(0,234,255,0.08);
+        }
+        h2{
+            margin:0 0 4px;
+            font-size:22px;
+        }
+        .sub{
+            font-size:12px;
+            opacity:.8;
+            margin-bottom:14px;
+        }
+        .field{
+            margin-bottom:12px;
+            text-align:left;
+        }
+        .field label{
+            display:block;
+            font-size:11px;
+            margin-bottom:4px;
+            opacity:.85;
+        }
+        .field input{
+            width:100%;
+            padding:9px 11px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,0.22);
+            background:#02071a;
+            color:var(--text);
+            font-size:13px;
+        }
+        .hint{
+            font-size:10px;
+            opacity:.7;
+            margin-top:3px;
+        }
+        .btn-primary{
+            width:100%;
+            margin-top:8px;
+            padding:10px;
+            border:none;
+            border-radius:999px;
+            background:var(--accent);
+            color:#000;
+            font-size:14px;
+            cursor:pointer;
+        }
+        .switch{
+            margin-top:10px;
+            font-size:11px;
+            text-align:center;
+        }
+        .switch span{
+            color:var(--accent);
+            cursor:pointer;
+        }
+        .error{
+            font-size:11px;
+            color:#ff8b8b;
+            margin-top:6px;
+            min-height:14px;
+        }
+        /* Align Google button exactly like primary buttons */
+        .google-wrapper {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Force Google button width & shape */
+        .google-wrapper iframe {
+            width: 100% !important;
+            max-width: 100%;
+            border-radius: 999px !important; /* same pill shape */
+        }
+
+        /* Match button height */
+        .google-wrapper div[role="button"] {
+            height: 44px !important; /* same as btn-primary */
+        }
+
+    </style>
+</head>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<body>
+<div class="shell">
+    <div class="left">
+        <div class="logo">AirAware</div>
+        <div class="slogan">Precision in Every Prediction</div>
+        <div class="tag">
+            Monitor live AQI, see pollutant breakdowns and get AI-powered
+            safety suggestions for every Indian state – all in one dashboard.
+        </div>
+    </div>
+    <div class="right">
+        <div class="tabs">
+            <div class="tab active" id="tab-signup" onclick="showForm('signup')">Sign Up</div>
+            <div class="tab" id="tab-login" onclick="showForm('login')">Login</div>
+        </div>
+
+        <!-- SIGNUP -->
+        <div id="signupForm">
+            <h2>Create Account</h2>
+            <div class="sub">Create your AirAware account to open the dashboard.</div>
+
+            <div class="field">
+                <label>Username</label>
+                <input id="suUsername" placeholder="Choose a username">
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input id="suEmail" placeholder="Enter your email">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input id="suPassword" type="password" placeholder="Create strong password">
+                <div class="hint">Min 8 chars, one capital, one number, one special character.</div>
+            </div>
+            <div class="field">
+                <label>Confirm Password</label>
+                <input id="suPassword2" type="password" placeholder="Re‑enter password">
+            </div>
+            <button class="btn-primary" onclick="handleSignup()">Sign Up</button>
+            
+            <div class="switch">Already have an account? <span onclick="showForm('login')">Login</span></div>
+            <div class="error" id="suError"></div>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="loginForm" style="display:none;">
+            <h2>Welcome Back</h2>
+            <div class="sub">Login to continue to your AirAware dashboard.</div>
+
+            <div class="field">
+                <label>Email</label>
+                <input id="liEmail" placeholder="Enter your registered email">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input id="liPassword" type="password" placeholder="Enter password">
+            </div>
+            <button class="btn-primary" onclick="handleLogin()">Login</button>
+            
+            <div class="switch">Need an account? <span onclick="showForm('signup')">Sign up</span></div>
+            <div class="error" id="liError"></div>
+        </div>
+        <!-- SHARED GOOGLE BUTTON -->
+        <div id="googleContainer" class="google-wrapper">
+            <div id="googleBtn"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function showForm(which){
+    document.getElementById('signupForm').style.display = which==='signup' ? 'block' : 'none';
+    document.getElementById('loginForm').style.display  = which==='login'  ? 'block' : 'none';
+    document.getElementById('tab-signup').classList.toggle('active', which==='signup');
+    document.getElementById('tab-login').classList.toggle('active', which==='login');
+    moveGoogleButton(which);
+}
+
+// simple validators
+function validEmail(email){
+    return email.includes('@') && email.includes('.');
+}
+function validPassword(pw){
+    if(pw.length < 8) return false;
+    if(!/[A-Z]/.test(pw)) return false;
+    if(!/[0-9]/.test(pw)) return false;
+    if(!/[!@#$%^&*(),.?":{}|<>]/.test(pw)) return false;
+    return true;
+}
+
+async function handleSignup(){
+    const u = document.getElementById('suUsername').value.trim();
+    const e = document.getElementById('suEmail').value.trim();
+    const p = document.getElementById('suPassword').value;
+    const p2 = document.getElementById('suPassword2').value;
+    const err = document.getElementById('suError');
+    err.textContent = '';
+
+    if(!u || !e || !p || !p2){
+        err.textContent = 'All fields are required.';
+        return;
+    }
+    if(!validEmail(e)){
+        err.textContent = 'Please enter a valid email.';
+        return;
+    }
+    if(!validPassword(p)){
+        err.textContent = 'Password must have 8+ chars, capital, number & special symbol.';
+        return;
+    }
+    if(p !== p2){
+        err.textContent = 'Passwords do not match.';
+        return;
+    }
+
+    try{
+        const res = await fetch('/api/signup',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({username:u,email:e,password:p})
+        });
+        const data = await res.json();
+        if(!data.ok){
+            err.textContent = data.error || 'Signup failed.';
+        }else{
+            alert('Account created! Please login.');
+            showForm('login');
+        }
+    }catch(e){
+        err.textContent = 'Server error. Try again.';
+    }
+}
+
+async function handleLogin(){
+    const e = document.getElementById('liEmail').value.trim();
+    const p = document.getElementById('liPassword').value;
+    const err = document.getElementById('liError');
+    err.textContent = '';
+
+    if(!e || !p){
+        err.textContent = 'Email and password required.';
+        return;
+    }
+    try{
+        const res = await fetch('/api/login',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({email:e,password:p})
+        });
+        const data = await res.json();
+        if(!data.ok){
+            err.textContent = data.error || 'Login failed.';
+        }else{
+            window.location.href = '/dashboard';
+        }
+    }catch(e){
+        err.textContent = 'Server error. Try again.';
+    }
+}
+
+
+//google signup
+window.onload = function () {
+    google.accounts.id.initialize({
+        client_id: "174930065404-ie3g21ujd2quisk3p7lihbct0ovtvo79.apps.googleusercontent.com",
+        callback: handleGoogleResponse
+    });
+    moveGoogleButton("signup");
+};
+
+function handleGoogleResponse(response) {
+    fetch("/api/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.ok) {
+            window.location.href = "/dashboard";
+        } else {
+            alert(data.error || "Google login failed");
+        }
+    })
+    .catch(() => alert("Server error"));
+}
+
+function moveGoogleButton(which) {
+    const container = document.getElementById("googleContainer");
+    const btnDiv = document.getElementById("googleBtn");
+
+    btnDiv.innerHTML = ""; // clear previous iframe
+
+    // Attach Google button under active form
+    if (which === "signup") {
+        document.getElementById("signupForm").appendChild(container);
+    } else {
+        document.getElementById("loginForm").appendChild(container);
+    }
+
+    google.accounts.id.renderButton(btnDiv, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        width: 280
+    });
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Profile – AirAware</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:radial-gradient(circle at top,#04245d,#000814);
+    color:#bfefff;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.profile-card{
+    width:360px;
+    background:rgba(4,10,30,0.9);
+    border-radius:20px;
+    padding:28px;
+    box-shadow:0 25px 55px rgba(0,0,0,0.8);
+    border:1px solid rgba(255,255,255,0.1);
+    text-align:center;
+}
+
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#00eaff;
+    color:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:36px;
+    font-weight:600;
+    margin:0 auto 14px;
+}
+
+h2{
+    margin:8px 0 2px;
+    color:#00eaff;
+}
+
+.email{
+    font-size:13px;
+    opacity:0.85;
+    margin-bottom:20px;
+}
+
+.info{
+    text-align:left;
+    margin-top:18px;
+}
+
+
+
+.tag{
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:11px;
+    background:rgba(0,234,255,0.15);
+    color:#00eaff;
+}
+
+.btn{
+    margin-top:18px;
+    width:100%;
+    padding:10px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.btn-primary{
+    background:#00eaff;
+    color:#000;
+}
+
+.btn-secondary{
+    background:rgba(255,255,255,0.08);
+    color:#bfefff;
+    margin-top:10px;
+}
+
+.favorite-card {
+    margin-top: 22px;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(0,234,255,0.15), rgba(0,0,0,0.6));
+    border: 1px solid rgba(0,234,255,0.3);
+    text-align: center;
+}
+
+.fav-title {
+    font-size: 12px;
+    letter-spacing: 1px;
+    opacity: 0.7;
+}
+
+.fav-state {
+    margin: 10px 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #00eaff;
+}
+
+.fav-desc {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 14px;
+}
+
+.fav-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    background: #00eaff;
+    color: #000;
+}
+
+.edit-card {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex-col;
+    justify-content: center; 
+    align-items: center;    
+               
+}
+
+.edit-title {
+    font-size: 13px;
+    margin-bottom: 10px;
+    color: #00eaff;
+}
+
+.edit-card input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(0,0,0,0.5);
+    color: #bfefff;
+}
+
+.edit-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 999px;
+    border: none;
+    background: #00eaff;
+    color: #000;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.msg {
+    font-size: 11px;
+    margin-top: 6px;
+}
+.note {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<div class="profile-card">
+
+    <div class="avatar">
+        {{ username[0]|upper }}
+    </div>
+    <div class="email">User ID: #{{ user_id }}</div>
+
+    <h2>{{ username }}</h2>
+    <div class="email">{{ email }}</div>
+
+    <div class="info">
+
+    </div>
+    <div class="favorite-card">
+    <div class="fav-title">Your Favorite State</div>
+
+    <div class="fav-state">
+        {{ favorite_state if favorite_state else "Not set" }}
+    </div>
+
+    <div class="fav-desc">
+        {% if favorite_state %}
+            Air quality trends for your pinned state will load automatically on login.
+        {% else %}
+            Pin a state from the dashboard to personalize your experience.
+        {% endif %}
+    </div>
+
+    <button class="fav-btn" onclick="window.location.href='/dashboard'">
+        View AQI Dashboard
+    </button>
+</div>
+
+<div class="edit-card">
+    <div class="edit-title">Edit Username</div>
+
+    <input id="newUsername" value="{{ username }}" />
+
+    <button class="edit-btn" onclick="updateUsername()">
+        Save Username
+    </button>
+
+    <div class="msg" id="nameMsg"></div>
+</div>
+
+<div class="edit-card">
+    <div class="edit-title">Change Password</div>
+
+    {% if password_managed_by_google %}
+        <div class="note">
+            Password changes are managed by Google.
+        </div>
+    {% else %}
+        <input type="password" id="currPw" placeholder="Current password">
+        <input type="password" id="newPw" placeholder="New password">
+
+        <button class="edit-btn" onclick="changePassword()">
+            Update Password
+        </button>
+
+        <div class="msg" id="pwMsg"></div>
+    {% endif %}
+</div>
+
+
+
+    <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
+        Back to Dashboard
+    </button>
+
+    <button class="btn btn-secondary" onclick="window.location.href='/logout'">
+        Logout
+    </button>
+
+</div>
+
+
+<script>
+function updateUsername() {
+    const u = document.getElementById("newUsername").value.trim();
+    const msg = document.getElementById("nameMsg");
+
+    fetch("/api/update-username", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ username: u })
+    })
+    .then(r => r.json())
+    .then(d => {
+        msg.textContent = d.ok ? "Username updated" : d.error;
+    });
+}
+
+function changePassword() {
+    const c = document.getElementById("currPw").value;
+    const n = document.getElementById("newPw").value;
+    const msg = document.getElementById("pwMsg");
+
+    fetch("/api/change-password", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            current_password: c,
+            new_password: n
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        msg.textContent = d.ok ? "Password updated" : d.error;
+    });
+}
+</script>
+
+</body>
+</html>
