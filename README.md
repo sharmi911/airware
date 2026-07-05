@@ -1,97 +1,108 @@
-AirWare Project
-Infosys Virtual Internship 6.0
-Project Overview
+# Air-Aware – Precision in Every Prediction
 
-AirWare is a smart and innovative project developed as part of the Infosys Virtual Internship 6.0 program. The project focuses on creating an efficient and technology-driven solution to improve air quality monitoring and environmental awareness using modern software and hardware integration.
+Air-Aware is an AI-powered air quality prediction system developed as part of the Infosys Springboard Virtual Internship 6.0.  
+The project focuses on analyzing environmental data and predicting air quality levels using Machine Learning techniques.
 
-The main objective of this project is to collect environmental data, analyze air conditions, and provide real-time monitoring through an interactive system.
+---
 
-Features
-Real-time air quality monitoring
-Sensor-based environmental data collection
-User-friendly dashboard/interface
-Data visualization and analysis
-Alert system for poor air quality levels
-Efficient and scalable architecture
-IoT integration support
-Technologies Used
-Hardware Components
-Air Quality Sensors
-Microcontroller / Raspberry Pi / Arduino
-Wi-Fi Module
-Power Supply Unit
-Software Technologies
-Python
-HTML
-CSS
-JavaScript
-Flask / Node.js (if applicable)
-MySQL / Firebase (if applicable)
-System Architecture
+## 📌 Project Overview
 
-The AirWare system works by collecting environmental data through sensors. The collected data is processed using the microcontroller and transmitted to the backend server or application. Users can monitor air quality information through a dashboard interface.
+Air pollution is one of the major environmental challenges affecting human health and climate.  
+This project helps in:
 
-Workflow
-Sensors collect air quality data.
-Microcontroller processes the data.
-Data is sent to the application/server.
-Dashboard displays real-time readings.
-Alerts are generated when air quality exceeds safe limits.
-Installation Steps
-Clone the Repository
-git clone https://github.com/sharmi911/airware.git
-Navigate to the Project Directory
-cd airware
-Install Dependencies
+- Monitoring pollution levels
+- Predicting air quality conditions
+- Visualizing environmental data
+- Supporting awareness through AI-based analysis
+
+---
+
+## 🚀 Features
+
+- Air Quality Prediction using Machine Learning
+- Data Analysis and Visualization
+- Pollution Trend Monitoring
+- Data Preprocessing and Cleaning
+- Predictive Model Training
+- User-Friendly Interface
+
+---
+
+## 🛠️ Technologies Used
+
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Scikit-learn
+- Jupyter Notebook
+
+---
+
+## ⚙️ Installation
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/MachikaKapil/Air-Aware-precision-in-every-prediction-.git
+```
+
+### Navigate to Project Folder
+
+```bash
+cd Air-Aware-precision-in-every-prediction-
+```
+
+### Install Required Packages
+
+```bash
 pip install -r requirements.txt
-Run the Project
+```
+
+---
+
+## ▶️ Run the Project
+
+```bash
 python app.py
-Folder Structure
-airware/
-│
-├── src/
-├── sensors/
-├── static/
-├── templates/
-├── database/
-├── app.py
-├── requirements.txt
-└── README.md
-Project Objectives
-To monitor air quality efficiently
-To increase environmental awareness
-To provide real-time pollution analysis
-To develop a smart IoT-based monitoring system
-To create a scalable and user-friendly solution
-Future Enhancements
-Mobile application integration
-AI-based air quality prediction
-Cloud data storage
-GPS-based pollution mapping
-Voice alert system
-Advanced analytics dashboard
-Learning Outcomes
+```
 
-Through this project, we gained knowledge in:
+or open using Jupyter Notebook:
 
-IoT system development
-Sensor integration
-Backend and frontend development
-Data handling and visualization
-Real-time monitoring systems
-Team collaboration and project management
-Internship Details
+```bash
+jupyter notebook
+```
 
-Program: Infosys Virtual Internship 6.0
-Project Name: AirWare
-Domain: python
-Organization: Infosys Springboard
+---
 
-This project is developed for educational and internship purposes under Infosys Virtual Internship 6.0.
+## 📊 Machine Learning Workflow
 
-Contact
+1. Data Collection  
+2. Data Cleaning  
+3. Feature Engineering  
+4. Model Training  
+5. Model Evaluation  
+6. Air Quality Prediction  
 
-For any queries or suggestions:
+---
 
-GitHub: https://github.com/sharmi911
-Email: sharmikagangadharan@gmail.com
+## 👨‍💻 Contributors
+
+- Machika Kapil  
+- Joseph Alivs Sajith  
+- Sharmika Gangadharan  
+
+---
+
+## 🏆 Internship
+
+Developed under Infosys Springboard Virtual Internship 6.0
+
+---
+
+## 📜 License
+
+This project is developed for educational and internship demonstration purposes only.
+
+---
+
