@@ -86,13 +86,6 @@ jupyter notebook
 
 ---
 
-## 👨‍💻 Contributors
-
-- Machika Kapil  
-- Joseph Alivs Sajith  
-- Sharmika Gangadharan  
-
----
 
 ## 🏆 Internship
 
